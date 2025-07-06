@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<title>Infos du téléphone</title>
+</head>
+<body>
+<h1>Infos de ton téléphone</h1>
+<div id="infos"></div>
+
+<script>
+// Fonction pour détecter l'OS via le userAgent
+function detectOS() {
+    const userAgent = navigator.userAgent || navigator.vendor || window.opera;
+    if (/android/i.test(userAgent)) {
+        return "Android";
+    }
+    if (/iPad|iPhone|iPod/.test(userAgent) && !window.MSStream) {
+        return "iOS";
+    }
+    return "Inconnu";
+}
+
+// Fonction pour afficher le niveau de batterie si possible
+function getBatteryLevel() {
+    if (navigator.getBattery) {
+        navigator.getBattery().then(function(battery) {
+            const level = battery.level * 100;
+            document.getElementById("infos").innerHTML += `<p>Niveau de batterie : ${level}%</p>`;
+        });
+    } else {
+        document.getElementById("infos").innerHTML += "<p>API batterie non supportée</p>";
+    }
+}
+
+// Affichage des infos
+document.getElementById("infos").innerHTML = `
+    <p>Système d'exploitation : ${detectOS()}</p>
+    <p>User-Agent : ${navigator.userAgent}</p>
+`;
+
+// Récupération niveau batterie
+getBatteryLevel();
+</script>
+</body>
+</html>
