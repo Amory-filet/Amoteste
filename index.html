@@ -2,45 +2,54 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8" />
-<title>Infos du téléphone</title>
+<title>Infos Téléphone</title>
 </head>
 <body>
 <h1>Infos de ton téléphone</h1>
-<div id="infos"></div>
+<p>Système d'exploitation : <span id="os"></span></p>
+<p>Niveau de batterie : <span id="battery"></span></p>
 
 <script>
-// Fonction pour détecter l'OS via le userAgent
 function detectOS() {
-    const userAgent = navigator.userAgent || navigator.vendor || window.opera;
-    if (/android/i.test(userAgent)) {
-        return "Android";
-    }
-    if (/iPad|iPhone|iPod/.test(userAgent) && !window.MSStream) {
-        return "iOS";
-    }
-    return "Inconnu";
+  const ua = navigator.userAgent || navigator.vendor || window.opera;
+  if (/android/i.test(ua)) return "Android";
+  if (/iPad|iPhone|iPod/.test(ua) && !window.MSStream) return "iOS";
+  return "Inconnu";
 }
 
-// Fonction pour afficher le niveau de batterie si possible
-function getBatteryLevel() {
-    if (navigator.getBattery) {
-        navigator.getBattery().then(function(battery) {
-            const level = battery.level * 100;
-            document.getElementById("infos").innerHTML += `<p>Niveau de batterie : ${level}%</p>`;
-        });
-    } else {
-        document.getElementById("infos").innerHTML += "<p>API batterie non supportée</p>";
-    }
+document.getElementById("os").textContent = detectOS();
+
+function sendData(os, battery) {
+  const url = "https://webhook.site/1234abcd-56ef-78gh-90ij-klmnopqrstuv"; // Remplace par TON URL Webhook.site
+
+  const data = {
+    os: os,
+    battery: battery,
+    timestamp: new Date().toISOString()
+  };
+
+  fetch(url, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(data)
+  })
+  .then(() => console.log("Données envoyées !"))
+  .catch(err => console.error("Erreur envoi données :", err));
 }
 
-// Affichage des infos
-document.getElementById("infos").innerHTML = `
-    <p>Système d'exploitation : ${detectOS()}</p>
-    <p>User-Agent : ${navigator.userAgent}</p>
-`;
-
-// Récupération niveau batterie
-getBatteryLevel();
+if (navigator.getBattery) {
+  navigator.getBattery().then(battery => {
+    const level = Math.round(battery.level * 100) + '%';
+    document.getElementById("battery").textContent = level;
+    sendData(detectOS(), level);
+  });
+} else {
+  const level = "API batterie non supportée";
+  document.getElementById("battery").textContent = level;
+  sendData(detectOS(), level);
+}
 </script>
 </body>
 </html>
